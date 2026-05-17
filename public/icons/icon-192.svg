@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1E1E2C"/>
+      <stop offset="100%" style="stop-color:#0D0D14"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4DABF7"/>
+      <stop offset="100%" style="stop-color:#228BE6"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="38" fill="url(#bg)"/>
+  <rect x="16" y="16" width="160" height="160" rx="28" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <!-- School building icon -->
+  <rect x="52" y="80" width="88" height="68" rx="4" fill="url(#accent)" opacity="0.9"/>
+  <rect x="60" y="88" width="20" height="20" rx="3" fill="#0D0D14" opacity="0.6"/>
+  <rect x="86" y="88" width="20" height="20" rx="3" fill="#0D0D14" opacity="0.6"/>
+  <rect x="112" y="88" width="20" height="20" rx="3" fill="#0D0D14" opacity="0.6"/>
+  <rect x="78" y="116" width="36" height="32" rx="4" fill="#0D0D14" opacity="0.5"/>
+  <!-- Roof -->
+  <polygon points="44,82 96,44 148,82" fill="#4DABF7" opacity="0.7"/>
+  <!-- Flag -->
+  <line x1="96" y1="44" x2="96" y2="28" stroke="#4DABF7" stroke-width="2.5" stroke-linecap="round"/>
+  <rect x="96" y="28" width="18" height="11" rx="2" fill="#FF6B6B" opacity="0.85"/>
+  <!-- C E T I letters -->
+  <text x="96" y="170" font-family="system-ui,sans-serif" font-size="18" font-weight="800" fill="#4DABF7" text-anchor="middle" letter-spacing="6">CETI</text>
+</svg>
