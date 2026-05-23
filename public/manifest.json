@@ -1,15 +1,13 @@
 {
-  "name": "Horário CETI DARIANA",
-  "short_name": "CETI",
-  "description": "Horário de Aulas 2026 — CETI DARIANA. Consulte rapidamente as aulas por dia e turma.",
+  "name": "Horario CETI DARIANA",
+  "short_name": "Tempos de Aula",
+  "description": "Horario de Aulas 2026 - CETI DARIANA",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait-primary",
   "background_color": "#0D0D14",
   "theme_color": "#0D0D14",
   "lang": "pt-BR",
-  "categories": ["education", "productivity"],
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -22,38 +20,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Segunda-feira",
-      "short_name": "SEG",
-      "description": "Ver aulas de segunda-feira",
-      "url": "/?dia=seg",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Hoje",
-      "short_name": "HOJE",
-      "description": "Ver aulas de hoje",
-      "url": "/?hoje=1",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshots/desktop.png",
-      "sizes": "1280x800",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Horário completo — visão desktop"
-    },
-    {
-      "src": "/screenshots/mobile.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Horário completo — visão mobile"
     }
   ]
 }
