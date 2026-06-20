@@ -739,6 +739,46 @@
   #status-bar.online .sb-dot, #status-bar.offline .sb-dot { animation: none; }
   @keyframes pulse-dot { 0%,100%{opacity:1}50%{opacity:.3} }
 
+  /* ── BOTÕES DISCRETOS DE ACESSO (Admin / Coord) ── */
+  .secret-btn {
+    position: fixed;
+    top: 10px;
+    z-index: 99999;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.20);
+    font-size: 15px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s, color .2s;
+    -webkit-tap-highlight-color: transparent;
+    backdrop-filter: blur(4px);
+    pointer-events: auto;
+    outline: none;
+  }
+  .secret-btn:hover, .secret-btn:active {
+    background: rgba(255,255,255,0.13);
+    color: rgba(255,255,255,0.45);
+  }
+  #admin-secret-zone { right: 10px; }
+  #coord-secret-zone { left:  10px; }
+
+  /* Ajuste de cor para temas claros */
+  body.theme-white .secret-btn,
+  body.theme-royal .secret-btn,
+  body.theme-pink  .secret-btn {
+    background: rgba(0,0,0,0.05);
+    color: rgba(0,0,0,0.18);
+  }
+  body.theme-white .secret-btn:hover,
+  body.theme-royal .secret-btn:hover,
+  body.theme-pink  .secret-btn:hover {
+    background: rgba(0,0,0,0.10);
+    color: rgba(0,0,0,0.45);
+  }
+
   /* ── SAVE INDICATOR on admin bar ── */
   #save-indicator {
     font-family: var(--font-display); font-size: .62rem; font-weight: 700;
@@ -757,11 +797,11 @@
   <span id="status-text">Offline — dados salvos localmente</span>
 </div>
 
-<!-- ZONA SECRETA ADMIN (duplo toque canto superior direito) -->
-<div class="admin-secret-zone" id="admin-secret-zone"></div>
+<!-- BOTÃO DISCRETO ADMIN (canto superior direito) -->
+<button class="secret-btn" id="admin-secret-zone" title="" aria-label="Acesso restrito" onclick="openAdminLogin()">🔑</button>
 
-<!-- ZONA SECRETA COORDENAÇÃO (duplo toque canto superior esquerdo) -->
-<div class="coord-secret-zone" id="coord-secret-zone"></div>
+<!-- BOTÃO DISCRETO COORDENAÇÃO (canto superior esquerdo) -->
+<button class="secret-btn" id="coord-secret-zone" title="" aria-label="Acesso restrito" onclick="openCoordLogin()">🔒</button>
 
 <header>
   <div class="school-tag">CETI DARIANA · 2026</div>
@@ -1028,6 +1068,18 @@
         </div>
         <button class="modal-submit" onclick="saveSchoolInfo()" style="margin-top:.5rem;">💾 Salvar Informações</button>
       </div>
+
+      <div class="admin-section">
+        <div class="admin-section-title">📋 Acesso da Coordenação</div>
+        <div class="admin-info-box" style="margin-bottom:1rem;">
+          Altere a senha usada pelo painel da <strong>Coordenação</strong>. Deixe em branco para não alterar.
+        </div>
+        <div class="modal-field">
+          <label>Nova Senha da Coordenação</label>
+          <input class="modal-input" id="input-coord-keyword" type="password" placeholder="Nova senha (deixe em branco para não alterar)" autocomplete="new-password" />
+        </div>
+        <button class="modal-submit" onclick="saveCoordKeyword()" style="margin-top:.5rem;background:linear-gradient(135deg,#69DB7C,#2F9E44);">💾 Salvar Senha da Coordenação</button>
+      </div>
       <div class="admin-section">
         <div class="admin-section-title">ℹ️ Informações do Sistema</div>
         <div class="admin-info-box" id="system-info-box">
@@ -1111,6 +1163,45 @@
     </svg>
     Falar com o Suporte: (92) 98631-8382
   </a>
+</div>
+
+<!-- MODAL LOGIN ADMIN -->
+<div class="modal-overlay" id="login-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('login-modal')">✕</button>
+    <div class="modal-logo">
+      <div class="lock-big">🔑</div>
+      <h2>Acesso Administrador</h2>
+      <p>CETI DARIANA · Painel Administrativo</p>
+    </div>
+
+    <!-- Etapa 1: palavra-chave -->
+    <div id="keyword-gate">
+      <div class="modal-error" id="keyword-error">Palavra-chave incorreta. Tente novamente.</div>
+      <div class="modal-field">
+        <label>Palavra-chave</label>
+        <input type="password" class="modal-input" id="keyword-input" placeholder=""
+          onkeydown="if(event.key==='Enter')checkKeyword()" autocomplete="off" />
+      </div>
+      <button class="modal-submit" onclick="checkKeyword()">Continuar →</button>
+    </div>
+
+    <!-- Etapa 2: e-mail + senha -->
+    <div id="login-fields" style="display:none">
+      <div class="modal-error" id="login-error">E-mail ou senha incorretos.</div>
+      <div class="modal-field">
+        <label>E-mail</label>
+        <input type="email" class="modal-input" id="login-email" placeholder=""
+          onkeydown="if(event.key==='Enter')doLogin()" autocomplete="off" />
+      </div>
+      <div class="modal-field">
+        <label>Senha</label>
+        <input type="password" class="modal-input" id="login-password" placeholder=""
+          onkeydown="if(event.key==='Enter')doLogin()" autocomplete="off" />
+      </div>
+      <button class="modal-submit" onclick="doLogin()">Entrar →</button>
+    </div>
+  </div>
 </div>
 
 <div class="modal-overlay" id="coord-login-modal">
@@ -1387,14 +1478,20 @@ let currentTurma = 'all';
 // RENDER UI
 // ─────────────────────────────────────────────
 
+// Dia atual da semana (ex: 'Quarta'), ou 'Segunda' se for fim de semana
+const TODAY_DAY = (() => {
+  const dow = new Date().getDay(); // 0=Dom,1=Seg,...,5=Sex,6=Sáb
+  return DAYS[dow - 1] || DAYS[0]; // DAYS[0]=Segunda ... DAYS[4]=Sexta
+})();
+
 // Build tabs
 (function buildTabs() {
   const nav = document.getElementById('tabs');
   DAYS.forEach(d => {
     const btn = document.createElement('button');
-    btn.className = 'tab-btn' + (d === 'Segunda' ? ' active' : '');
+    btn.className = 'tab-btn' + (d === TODAY_DAY ? ' active' : '');
     btn.textContent = d + '-feira';
-    btn.style.borderColor = d === 'Segunda' ? DAY_COLORS[d] : 'transparent';
+    btn.style.borderColor = d === TODAY_DAY ? DAY_COLORS[d] : 'transparent';
     btn.onclick = () => selectDay(d);
     nav.appendChild(btn);
   });
@@ -1420,10 +1517,12 @@ let currentTurma = 'all';
   const main = document.getElementById('panels');
   DAYS.forEach(d => {
     const div = document.createElement('div');
-    div.className = 'day-panel' + (d === 'Segunda' ? ' active' : '');
+    div.className = 'day-panel' + (d === TODAY_DAY ? ' active' : '');
     div.id = 'panel-' + d;
     main.appendChild(div);
   });
+  // Garante que o dia atual está selecionado corretamente
+  selectDay(TODAY_DAY);
 })();
 
 function selectDay(day) {
@@ -2571,6 +2670,25 @@ function saveSchoolInfo() {
   });
 }
 
+function saveCoordKeyword() {
+  const newCoordKeyword = document.getElementById('input-coord-keyword').value.trim();
+  if (!newCoordKeyword) { alert('Digite a nova senha da coordenação.'); return; }
+  sha256(newCoordKeyword).then(coordHash => {
+    COORD_KEYWORD_HASH = coordHash;
+    const current = JSON.parse(localStorage.getItem('ceti-school-info') || '{}');
+    current.coordKeywordHash = coordHash;
+    localStorage.setItem('ceti-school-info', JSON.stringify(current));
+    if (window.__firebaseReady && window.__fbSaveSchoolInfo) {
+      window.__fbSaveSchoolInfo(current).then(ok => {
+        if (ok) showStatusBar('online', '✓ Senha da coordenação salva na nuvem');
+      });
+    }
+    document.getElementById('input-coord-keyword').value = '';
+    showSaveIndicator();
+    alert('✅ Senha da Coordenação atualizada com sucesso!');
+  });
+}
+
 function applySchoolInfo(info) {
   const tag = document.querySelector('header .school-tag');
   const h1 = document.querySelector('header h1');
@@ -2589,6 +2707,7 @@ function applySchoolInfo(info) {
   if (info.adminEmail)       ADMIN_EMAIL        = info.adminEmail;
   if (info.adminPassHash)    ADMIN_PASS_HASH     = info.adminPassHash;
   if (info.adminKeywordHash) ADMIN_KEYWORD_HASH  = info.adminKeywordHash;
+  if (info.coordKeywordHash) COORD_KEYWORD_HASH  = info.coordKeywordHash;
 }
 
 function loadSchoolInfo() {
@@ -2668,35 +2787,8 @@ function updateOnlineStatus() {
 window.addEventListener('online',  updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 
-// ── Zona secreta: duplo toque no canto superior direito ──
-(function initSecretZone() {
-  const zone = document.getElementById('admin-secret-zone');
-  if (!zone) return;
-  let lastTap = 0;
-  function handleTap(e) {
-    e.preventDefault();
-    const now = Date.now();
-    if (now - lastTap < 400) { openAdminLogin(); lastTap = 0; }
-    else { lastTap = now; }
-  }
-  zone.addEventListener('touchend', handleTap, { passive: false });
-  zone.addEventListener('dblclick', handleTap);
-})();
-
-// ── Zona secreta: duplo toque no canto superior ESQUERDO (Coordenação) ──
-(function initCoordSecretZone() {
-  const zone = document.getElementById('coord-secret-zone');
-  if (!zone) return;
-  let lastTap = 0;
-  function handleTap(e) {
-    e.preventDefault();
-    const now = Date.now();
-    if (now - lastTap < 400) { openCoordLogin(); lastTap = 0; }
-    else { lastTap = now; }
-  }
-  zone.addEventListener('touchend', handleTap, { passive: false });
-  zone.addEventListener('dblclick', handleTap);
-})();
+// ── Botões de acesso discreto agora usam onclick direto no HTML ──
+// (as antigas zonas invisíveis foram substituídas por botões visíveis)
 
 // ─────────────────────────────────────────────
 // COORDENAÇÃO AUTH
